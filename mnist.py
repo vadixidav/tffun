@@ -3,10 +3,8 @@ from __future__ import absolute_import, division, print_function, \
 
 import tensorflow as tf
 
-from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Dense, Flatten, Conv2D
 from tensorflow.keras import Model
-
-from defconv import Defconv
 
 from tensorflow.keras.utils import Progbar
 
@@ -30,16 +28,17 @@ test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
 class MyModel(Model):
     def __init__(self):
         super(MyModel, self).__init__()
-        self.conv1 = Defconv(4, [4, 4], activation='linear')
-        self.flatten = Flatten()
-        self.d1 = Dense(128, activation='relu')
-        self.d2 = Dense(10, activation='softmax')
+        self.model = [
+            Conv2D(4, [4, 4], activation='relu'),
+            Flatten(),
+            Dense(128, activation='relu'),
+            Dense(10, activation='softmax'),
+        ]
 
     def call(self, x):
-        x = self.conv1(x)
-        x = self.flatten(x)
-        x = self.d1(x)
-        return self.d2(x)
+        for layer in self.model:
+            x = layer(x)
+        return x
 
 
 # Create an instance of the model
